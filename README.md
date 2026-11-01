@@ -90,9 +90,6 @@ La documentación interactiva permite consultar y probar los endpoints de aulas 
 
 **EVIDENCIA 1 — Swagger con los endpoints de reservas**
 
-Guardar la captura como:
-
-`docs/evidencias/swagger-reservas.png`
 
 ![Documentación Swagger de reservas](docs/evidencias/swagger-reservas.png)
 
@@ -135,11 +132,8 @@ ruff check .
 
 **EVIDENCIA 2 — Ejecución correcta de los tests**
 
-Guardar la captura como:
 
-`docs/evidencias/tests-pytest.png`
-
-![Resultado de Pytest](docs/evidencias/tests-pytest.png)
+![Resultado de Pytest](docs/evidencias/test-pytest.png)
 
 ## Git Hooks
 
@@ -296,9 +290,6 @@ healthy
 
 **EVIDENCIA 3 — Contenedor Docker funcionando**
 
-Guardar la captura como:
-
-`docs/evidencias/docker-healthy.png`
 
 ![Estado healthy del contenedor](docs/evidencias/docker-healthy.png)
 
@@ -334,10 +325,6 @@ La publicación de la imagen y el despliegue utilizan los secretos configurados 
 
 **EVIDENCIA 4 — Pipeline completado correctamente**
 
-Guardar una captura de la ejecución de GitHub Actions donde se vean los trabajos completados correctamente:
-
-`docs/evidencias/github-actions-ok.png`
-
 ![Pipeline de GitHub Actions completado](docs/evidencias/github-actions-ok.png)
 
 ### Evidencia del despliegue en Debian
@@ -345,10 +332,6 @@ Guardar una captura de la ejecución de GitHub Actions donde se vean los trabajo
 El despliegue se realiza en el servidor Debian mediante el runner autoalojado y Docker Compose.
 
 **EVIDENCIA 5 — Aplicación desplegada y funcionando**
-
-Guardar una captura donde se vea el contenedor en ejecución y, si es posible, la respuesta correcta del endpoint `/health`:
-
-`docs/evidencias/deploy-debian.png`
 
 ![Despliegue de SmartCampus en Debian](docs/evidencias/deploy-debian.png)
 
