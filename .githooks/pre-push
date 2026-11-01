@@ -3,7 +3,7 @@
 echo "Ejecutando comprobaciones pre-push..."
 
 #ejecutamos todos los tests del proyecto, con unitarios e integracion
-python -m pytest -v
+python -m pytest -v --ignore=actions-runner
 
 #comprobamos si alguno de los tests ha fallado
 if [ $? -ne 0 ]; then

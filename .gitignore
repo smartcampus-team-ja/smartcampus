@@ -30,4 +30,6 @@ Thumbs.db
 
 # Logs
 *.log
-commit-log.txt
+commit-log.txtactions-runner/
+
+actions-runner/
