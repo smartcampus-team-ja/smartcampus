@@ -2,23 +2,23 @@
 
 echo "Ejecutando las comprobaciones pre-commit..."
 
-#comprobamos la calidad del codigo con Ruff
-python -m ruff check .
+PYTHON=".venv/bin/python"
+
+# Comprobamos la calidad del código con Ruff
+"$PYTHON" -m ruff check .
 
 if [ $? -ne 0 ]; then
     echo "Commit rechazado: Ruff ha encontrado errores."
     exit 1
 fi
 
-
-#ejecutamos los tests unitarios
-python -m pytest tests/test_services.py -v
+# Ejecutamos los tests unitarios
+"$PYTHON" -m pytest tests/test_services.py -v
 
 if [ $? -ne 0 ]; then
     echo "Commit rechazado: existen tests unitarios fallidos."
     exit 1
 fi
-
 
 echo "Todas las comprobaciones superadas."
 exit 0
