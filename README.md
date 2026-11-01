@@ -1,3 +1,101 @@
+# SmartCampus
+
+SmartCampus es una API desarrollada con **FastAPI** para la gestión de aulas universitarias y sus reservas.
+
+## Tecnologías utilizadas
+
+- Python
+- FastAPI
+- SQLAlchemy
+- SQLite
+- Pytest
+- Ruff
+- Docker y Docker Compose
+- Git y GitHub Actions
+
+## Instalación y ejecución local
+
+Clonar el repositorio:
+
+```bash
+git clone https://github.com/smartcampus-team-ja/smartcampus.git
+cd smartcampus
+```
+
+Crear y activar un entorno virtual:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+En Windows, activar el entorno con:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+Instalar las dependencias:
+
+```bash
+pip install -r requirements.txt
+```
+
+Iniciar la aplicación:
+
+```bash
+uvicorn app.main:app --reload
+```
+
+La API estará disponible en:
+
+- Aplicación: `http://127.0.0.1:8000`
+- Documentación Swagger: `http://127.0.0.1:8000/docs`
+- Estado de la API: `http://127.0.0.1:8000/health`
+
+## Gestión de aulas
+
+La aplicación permite gestionar las aulas universitarias mediante los siguientes endpoints:
+
+| Método | Endpoint | Descripción |
+|---|---|---|
+| `POST` | `/rooms` | Crear un aula |
+| `GET` | `/rooms` | Consultar todas las aulas |
+| `GET` | `/rooms/{id}` | Consultar un aula por ID |
+| `DELETE` | `/rooms/{id}` | Eliminar un aula |
+
+## Gestión de reservas
+
+La aplicación permite gestionar las reservas de las aulas universitarias.
+
+### Endpoints
+
+| Método | Endpoint | Descripción |
+|---|---|---|
+| `GET` | `/bookings` | Consultar las reservas |
+| `POST` | `/bookings` | Crear una reserva |
+| `DELETE` | `/bookings/{booking_id}` | Eliminar una reserva |
+
+### Reglas de negocio
+
+- No se puede reservar un aula inexistente.
+- La hora de inicio debe ser anterior a la hora de finalización.
+- No se permiten reservas solapadas para la misma aula y fecha.
+- Se permiten reservas consecutivas, siempre que no exista solapamiento.
+- No se puede eliminar una reserva inexistente.
+
+### Evidencia de la API
+
+La documentación interactiva permite consultar y probar los endpoints de aulas y reservas mediante Swagger.
+
+**EVIDENCIA 1 — Swagger con los endpoints de reservas**
+
+Guardar la captura como:
+
+`docs/evidencias/swagger-reservas.png`
+
+![Documentación Swagger de reservas](docs/evidencias/swagger-reservas.png)
+
 ## Tests
 
 El proyecto utiliza Pytest para ejecutar pruebas automáticas.
@@ -6,36 +104,42 @@ Se han implementado tests unitarios y tests de integración.
 
 ### Tests de integración
 
-Los tests de integración comprueban los endpoints HTTP de la aplicación:
+Los tests de integración comprueban los endpoints HTTP de la aplicación, incluyendo:
 
 - `GET /health`
 - `POST /rooms`
 - `GET /rooms`
 - `GET /rooms/{id}`
 - `DELETE /rooms/{id}`
+- `GET /bookings`
+- `POST /bookings`
+- `DELETE /bookings/{booking_id}`
 
-También se comprueban casos de error como:
-
-- Capacidad igual o menor que 0.
-- Consulta de un aula inexistente.
-- Eliminación de un aula inexistente.
+También se comprueban diferentes casos de error y las reglas de negocio de las reservas.
 
 ### Tests unitarios
 
-Los tests unitarios comprueban directamente las funciones de `services.py`, incluyendo:
+Los tests unitarios comprueban directamente la lógica de los servicios de la aplicación, incluyendo las operaciones de gestión de aulas y reservas y sus validaciones.
 
-- Creación de aulas.
-- Consulta de aulas.
-- Consulta por ID.
-- Eliminación de aulas.
-- Validación de capacidad.
+Para ejecutar todos los tests:
 
-Para ejecutar todos los tests, dentro del proyecyo, en la terminal ejecutamos:
-
+```bash
 python -m pytest -v
+```
 
-Los 13 test comprobamos se ejecutan de manera correcta.
+Para comprobar la calidad del código con Ruff:
 
+```bash
+ruff check .
+```
+
+**EVIDENCIA 2 — Ejecución correcta de los tests**
+
+Guardar la captura como:
+
+`docs/evidencias/tests-pytest.png`
+
+![Resultado de Pytest](docs/evidencias/tests-pytest.png)
 
 ## Git Hooks
 
@@ -47,7 +151,7 @@ Los hooks se encuentran en:
 .githooks/
 ```
 
-Para indicar a Git que utilice esta carpeta se debe ejecutar:
+Para indicar a Git que utilice esta carpeta:
 
 ```bash
 git config core.hooksPath .githooks
@@ -86,13 +190,11 @@ El archivo `commit-log.txt` está incluido en `.gitignore` y no se almacena en e
 
 Se ejecuta automáticamente antes de realizar un push.
 
-Ejecuta todos los tests del proyecto mediante:
+Ejecuta los tests del proyecto mediante:
 
 ```bash
 python -m pytest -v
 ```
-
-Esto incluye los tests unitarios y los tests de integración.
 
 Si algún test falla, el push es rechazado.
 
@@ -112,7 +214,7 @@ junto con el script:
 scripts/push.sh
 ```
 
-El script realiza el `git push` normalmente y, si finaliza correctamente, ejecuta el script `post-push`.
+El script realiza el `git push` y, si finaliza correctamente, ejecuta el script `post-push`.
 
 Para utilizar el flujo completo en Windows:
 
@@ -176,12 +278,6 @@ La documentación Swagger está disponible en:
 http://127.0.0.1:8000/docs
 ```
 
-El endpoint de comprobación de estado es:
-
-```text
-GET /health
-```
-
 ### Healthcheck
 
 Docker Compose incluye un `healthcheck` que consulta periódicamente el endpoint `/health`.
@@ -198,15 +294,21 @@ Cuando la aplicación funciona correctamente, el contenedor aparece con estado:
 healthy
 ```
 
+**EVIDENCIA 3 — Contenedor Docker funcionando**
+
+Guardar la captura como:
+
+`docs/evidencias/docker-healthy.png`
+
+![Estado healthy del contenedor](docs/evidencias/docker-healthy.png)
+
 ### Persistencia
 
-La aplicación utiliza SQLite y un volumen Docker denominado `smartcampus-data`.
-
-Este volumen permite conservar la base de datos aunque el contenedor sea eliminado y creado de nuevo.
+La aplicación utiliza SQLite y un volumen Docker para conservar la base de datos aunque el contenedor sea eliminado y creado de nuevo.
 
 ### Variables de entorno
 
-El archivo `.env.example` contiene las variables de configuración necesarias:
+El archivo `.env.example` contiene las variables de configuración:
 
 ```env
 APP_ENV=development
@@ -215,4 +317,44 @@ HOST=0.0.0.0
 PORT=8000
 ```
 
-El archivo `.env` real no se almacena en Git.
+## Integración continua y despliegue (CI/CD)
+
+El proyecto utiliza **GitHub Actions** para automatizar las comprobaciones, la construcción de la imagen Docker, su publicación y el despliegue.
+
+El flujo de CI/CD contempla las siguientes etapas:
+
+1. **Tests:** ejecución de Ruff y Pytest con Python 3.11 y 3.12.
+2. **Docker Build:** construcción y validación de la imagen Docker.
+3. **Publicación:** publicación de la imagen en Docker Hub cuando se actualiza la rama `main`.
+4. **Despliegue:** actualización de la aplicación en el servidor Debian mediante un runner autoalojado (*self-hosted runner*).
+
+La publicación de la imagen y el despliegue utilizan los secretos configurados en GitHub Actions, evitando almacenar credenciales directamente en el código.
+
+### Evidencia de GitHub Actions
+
+**EVIDENCIA 4 — Pipeline completado correctamente**
+
+Guardar una captura de la ejecución de GitHub Actions donde se vean los trabajos completados correctamente:
+
+`docs/evidencias/github-actions-ok.png`
+
+![Pipeline de GitHub Actions completado](docs/evidencias/github-actions-ok.png)
+
+### Evidencia del despliegue en Debian
+
+El despliegue se realiza en el servidor Debian mediante el runner autoalojado y Docker Compose.
+
+**EVIDENCIA 5 — Aplicación desplegada y funcionando**
+
+Guardar una captura donde se vea el contenedor en ejecución y, si es posible, la respuesta correcta del endpoint `/health`:
+
+`docs/evidencias/deploy-debian.png`
+
+![Despliegue de SmartCampus en Debian](docs/evidencias/deploy-debian.png)
+
+## Repositorio
+
+Código fuente del proyecto:
+
+[SmartCampus en GitHub](https://github.com/smartcampus-team-ja/smartcampus)
+
