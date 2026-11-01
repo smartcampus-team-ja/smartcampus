@@ -1,0 +1,24 @@
+name: Test Self-Hosted Runner
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-runner:
+    runs-on:
+      - self-hosted
+      - linux
+      - x64
+
+    steps:
+      - name: Identify runner
+        run: |
+          echo "Runner funcionando correctamente"
+          echo "Hostname: $(hostname)"
+          echo "Sistema operativo:"
+          cat /etc/os-release
+          echo "Usuario:"
+          whoami
+          echo "Docker:"
+          docker --version
+          docker compose version

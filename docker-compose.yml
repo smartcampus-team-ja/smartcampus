@@ -1,6 +1,7 @@
 services:
   backend:
-    #construimos la imagen utilizando el Dockerfile 
+    #construimos la imagen utilizando el Dockerfile
+    image: ${DOCKERHUB_USERNAME:-local}/smartcampus:latest 
     build:
       context: .
       dockerfile: Dockerfile

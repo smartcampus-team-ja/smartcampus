@@ -1,0 +1,157 @@
+name: SmartCampus CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Tests Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.11"
+          - "3.12"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Ruff quality check
+        run: python -m ruff check .
+
+      - name: Run tests
+        run: python -m pytest -v
+
+  docker-build:
+    name: Build and validate Docker image
+    needs: tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Build Docker image
+        run: docker build -t smartcampus:ci .
+
+      - name: Start container
+        run: |
+          docker run -d \
+            --name smartcampus-ci \
+            -p 8000:8000 \
+            -e DATABASE_URL=sqlite:////data/smartcampus.db \
+            smartcampus:ci
+
+      - name: Validate health endpoint
+        run: |
+          for i in {1..20}; do
+            if curl -fsS http://127.0.0.1:8000/health; then
+              exit 0
+            fi
+            sleep 2
+          done
+
+          docker logs smartcampus-ci
+          exit 1
+
+      - name: Remove validation container
+        if: always()
+        run: docker rm -f smartcampus-ci || true
+
+  publish:
+    name: Publish Docker image
+    needs: docker-build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/smartcampus:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/smartcampus:${{ github.sha }}
+
+  deploy:
+    name: Deploy on Debian self-hosted runner
+    needs: publish
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on:
+      - self-hosted
+      - linux
+      - x64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Pull published Docker image
+        shell: bash
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+        run: docker compose pull backend
+
+      - name: Deploy with Docker Compose
+        shell: bash
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+        run: docker compose up -d --no-build
+
+      - name: Verify deployment
+        shell: bash
+        run: |
+          for i in {1..20}; do
+            if curl -fsS http://127.0.0.1:8000/health; then
+              echo "Despliegue correcto."
+              exit 0
+            fi
+            sleep 2
+          done
+
+          docker compose ps
+          docker compose logs backend
+          echo "El despliegue no responde correctamente."
+          exit 1
