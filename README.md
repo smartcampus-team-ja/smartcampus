@@ -341,3 +341,31 @@ Código fuente del proyecto:
 
 [SmartCampus en GitHub](https://github.com/smartcampus-team-ja/smartcampus)
 
+
+## Evidencias adicionales
+
+Se incluyen las siguientes capturas para documentar aspectos específicos de la configuración y el funcionamiento del proyecto:
+
+### 1. Validación de reservas solapadas
+
+La captura muestra cómo la API rechaza una reserva cuando existe otra reserva para la misma aula y en una franja horaria coincidente, devolviendo el código HTTP `409 Conflict`.
+
+![Validación de reservas solapadas](docs/evidencias/booking-overlap.png)
+
+### 2. Publicación de la imagen en Docker Hub
+
+Se muestra la imagen Docker del proyecto publicada correctamente en Docker Hub, con la etiqueta `latest`.
+
+![Imagen publicada en Docker Hub](docs/evidencias/dockerhub-image.png)
+
+### 3. Configuración de secretos de GitHub Actions
+
+La captura muestra los nombres de los secretos configurados en GitHub Actions (`DOCKERHUB_USERNAME` y `DOCKERHUB_TOKEN`). Por seguridad, no se muestran sus valores.
+
+![Secretos configurados en GitHub](docs/evidencias/github-secrets.png)
+
+### 4. Estado del runner autoalojado
+
+Se muestra el runner autoalojado de GitHub Actions registrado, preparado para ejecutar los trabajos de despliegue en el servidor Debian.
+
+![Runner autoalojado en línea](docs/evidencias/self-hosted-runner.png)
