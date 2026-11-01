@@ -2,15 +2,15 @@
 
 echo "Ejecutando comprobaciones pre-push..."
 
-#ejecutamos todos los tests del proyecto, con unitarios e integracion
-python -m pytest -v --ignore=actions-runner
+PYTHON=".venv/bin/python"
 
-#comprobamos si alguno de los tests ha fallado
+"$PYTHON" -m pytest -v --ignore=actions-runner
+
 if [ $? -ne 0 ]; then
     echo "Push rechazado: existen tests fallidos."
     exit 1
 fi
 
-#si todos los tests pasan dejamos hacer el push
-echo "Todos los tests superados."
+echo "Todas las comprobaciones pre-push superadas."
 exit 0
+EOF
